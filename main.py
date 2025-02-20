@@ -172,7 +172,7 @@ model = Model("Nutrient Optimization")
 
 
 #variáveis de decisão: quantidade (em gramas) de cada alimento a consumir, lb e ub a ser moidifcados comparado ao que quiser
-food_vars = {food: model.addVar(lb=10, ub=100, vtype=GRB.CONTINUOUS, name=food) for food in df["Nome"]}
+food_vars = {food: model.addVar(lb=0, ub=100, vtype=GRB.CONTINUOUS, name=food) for food in df["Nome"]}
 
 
 
