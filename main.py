@@ -1,28 +1,21 @@
 import pandas as pd
-import os
 
-# Read the CSV file
-dbgraxos = 'db/taco-db-graxos.csv'
-dados_graxos = pd.read_csv(dbgraxos)
-
-dbnutrientes = 'db/taco-db-nutrientes.csv'
-dbnutrientes2 = 'db/taco-db-nutrientes-2.csv'
+# Read and clean data
+db_graxos = 'db/taco-db-graxos.csv'
+db_nutrientes = 'db/taco-db-nutrientes.csv'
+db_nutrientes2 = 'db/taco-db-nutrientes-2.csv'
 # /\ precisei editar linha 185 do arquivo taco-db-graxos.csv para remover a vírgula que estava no final da linha
 # /\ precisei editar linha 473 e 475 do arquivo taco-db-nutrientes.csv para remover a vírgula que estava no final da linha
 
 #concatenar os dois arquivos de nutrientes
-dados_nutrientes = pd.read_csv(dbnutrientes)
-dados_nutrientes2 = pd.read_csv(dbnutrientes2)
-#remover a primeira coluna de nutrientes2
-dados_nutrientes2 = dados_nutrientes2.drop(dados_nutrientes2.columns[0], axis=1)
+dados_nutrientes = pd.read_csv(db_nutrientes)
+dados_nutrientes2 = pd.read_csv(db_nutrientes2).iloc[:, 1:]  #remove primeira coluna q é repetida
 
 # Concatenate the two nutrient dataframes
 dadosALL = pd.concat([dados_nutrientes, dados_nutrientes2], axis=1)
 
-# Display the first few rows of the dataframes
-dadosALL = dadosALL.drop(columns=["Unnamed: 13", "Unnamed: 16"], errors="ignore")
-print(dadosALL.iloc[3])
-input("Press Enter to continue...\n")
+# Clean food names by removing commas
+dadosALL["Nome"] = dadosALL["Nome"].str.replace(', ', ' ')
 
 
 foods = [
@@ -94,20 +87,24 @@ prices = [
 # Create a price dictionary
 price_dict = dict(zip(foods, prices))
 
-
-
-# Filter dataset to keep only the relevant foods
+# Filter and validate
 filtered_data = dadosALL[dadosALL["Nome"].isin(foods)].copy()
 
-#achar se tem algum alimento que n foi encontrado
-if set(foods) - set(filtered_data["Nome"]):
-    raise ValueError(f"The following foods were not found in the dataset: {', '.join(set(foods) - set(filtered_data["Nome"]))}")
 
 
 
-#add o preço
+
+
 filtered_data["Preço (R$/100g)"] = filtered_data["Nome"].map(price_dict)
 
-#printar os valores
-print(filtered_data.iloc[:, [0, 2, -1]])  #-1 = ultimo elemento (preço)
+
+
+# Check for missing matches
+missing = set(foods) - set(filtered_data["Nome"])
+if missing:
+    print(f"Warning: Missing foods {missing} - check name formatting")
+
+
+# Display results
+print(filtered_data[["Nome", "Preço (R$/100g)"]])
 
