@@ -105,7 +105,7 @@ nutrient_requirements = {
     "Energia (kcal)": (1700, 2500),
     "Proteína (g)": (70, 84),
     "Carboidrato (g)": (130, float("inf")), #trocado -1111 pra inf se nao o programa ignora o carboidrado
-    "Fibra alimentar (g)": (30, float("inf")),
+    "Fibra Alimentar (g)": (30, float("inf")), #renomeado 
     "Cálcio (mg)": (1200, 2000),
     "Magnésio (mg)": (420, 770),
     "Manganês (mg)": (2.30, 11),
@@ -115,15 +115,14 @@ nutrient_requirements = {
     "Potássio (mg)": (4700, float("inf")),
     "Cobre (mg)": (0.90, 10),
     "Zinco (mg)": (11, 40),
-    "Vitamina A_1 (Retinol) (mcg)": (900, 3000),
+    "Retinol(µg)": (900, 3000), #renomeado
     "Tiamina (mg)": (1.20, float("inf")),
     "Riboflavina (mg)": (1.30, float("inf")),
-    "Vitamina B_6 (Piridoxina) (mg)": (1.70, 100),
+    "Piridoxina (mg)": (1.70, 100), #renomeado
     "Niacina (mg)": (16, 35),
     "Vitamina C (mg)": (90, 2000)
 }
-
-
+#alguns foram renomeados para cair nos banco de dados
 
 
 #filtrar e validar os alimentos presentes nos dados
@@ -173,7 +172,7 @@ model = Model("Nutrient Optimization")
 
 
 #variáveis de decisão: quantidade (em gramas) de cada alimento a consumir, limitada a 1000 gramas (1 kg) por alimento
-food_vars = {food: model.addVar(lb=0, ub=1000, vtype=GRB.CONTINUOUS, name=food) for food in df["Nome"]}
+food_vars = {food: model.addVar(lb=0, ub=300, vtype=GRB.CONTINUOUS, name=food) for food in df["Nome"]}
 
 
 
@@ -233,7 +232,7 @@ if model.status == GRB.OPTIMAL:
             # Get price from dataframe column
             price = df.loc[df["Nome"] == food, "Preço (R$/100g)"].values[0]
             cost = (price * quantity) / 100
-            print(f"{food:<35} {quantity:>7.2f} gramas {'':>5} (R${price:>6.2f}/100g, {'':>2} Total: R${cost:>6.2f})")
+            print(f"{food:<55} {quantity:>10f} gramas {'':>5} (R${price:>6.2f}/100g, {'':>2} Total: R${cost:>6.2f})")
     print(f"\ncusto total: R${model.objVal:.2f}")
     input("[pressione enter para continuar]")
 
@@ -252,10 +251,5 @@ if model.status == GRB.OPTIMAL:
             min_val, 
             max_val
         ))
-    input("[pressione enter para terminar código]")
 else:
     print("\n#\n#\n#\nnenhuma solução ótima encontrada.\n#\n#\n#")
-    input("[pressione enter para SAIR]")
-
-
-
